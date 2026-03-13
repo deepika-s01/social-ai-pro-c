@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <title>SocialAI Pro | AI Writer</title>
+    <style>
+.content-container{
+width:100%;
+max-width:900px;
+display:flex;
+flex-direction:column;
+gap:20px;
+}
+        textarea { width: 100%; height: 200px; padding: 15px; border-radius: 12px; border: 1px solid #E2E8F0; font-family: inherit; font-size: 15px; box-sizing: border-box; }
+        
+        .analysis-box { background: #F5F3FF; padding: 20px; border-radius: 16px; border: 1px solid #DDD6FE; display: none; margin-top: 10px; }
+        .ai-result { background: #fff; padding: 25px; border-radius: 16px; border: 1px solid #E2E8F0; border-left: 6px solid var(--primary); display: none; margin-top: 10px; }
+
+        .score-bar-bg { width: 100%; background: #E2E8F0; height: 12px; border-radius: 10px; overflow: hidden; margin-top: 10px; }
+        .score-bar-fill { height: 100%; background: var(--primary); width: 0%; transition: width 1.5s ease-in-out; }
+        
+        .btn-small { width: auto; padding: 6px 14px; font-size: 12px; cursor: pointer; border-radius: 8px; border: none; font-weight: 600; color: white; }
+
+        .freq-badge {
+            margin-top: 15px;
+            padding: 12px;
+            background: white;
+            border-radius: 10px;
+            border: 1px dashed var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">SocialAI Pro</div>
+        <div class="nav-links-wrapper">
+            <a href="dashboard.html" class="nav-item ">🏠 Dashboard</a>
+            <a href="content.html" class="nav-item">📅 Content Calendar</a>
+            <a href="insights.html" class="nav-item">📊 Strategy Insights</a>
+            <a href="ai.html" class="nav-item active">🤖 AI Writer</a>
+        </div>
+        <a href="index.html" class="nav-item logout-item"><span>🚪 Log Out</span></a>
+    </div>
+
+    <div class="main-content">
+        <div class="content-container">
+            <h2 style="text-align: center;">Long-Form AI Writer</h2>
+            
+            <div class="card">
+                <label style="font-weight: 600; color: #64748B; display: block; margin-bottom: 10px;">Paste Article Content:</label>
+                <textarea id="longInput" placeholder="Paste your long notes here..."></textarea>
+                
+                <div style="margin-top: 20px;">
+                    <label style="display: block; font-weight: 600; color: #64748B; margin-bottom: 8px;">Target Platform:</label>
+                    <select id="conversionType" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #E2E8F0;">
+                        <option value="thread">Twitter Thread</option>
+                        <option value="linkedin">LinkedIn Summary</option>
+                        <option value="newsletter">Email Newsletter</option>
+                    </select>
+                </div>
+                <button id="transformBtn" class="btn" onclick="transformContent()" style="margin-top: 20px;">🪄 Transform with AI</button>
+            </div>
+
+            <div id="analysisBox" class="analysis-box">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-weight: 700; color: var(--primary); font-size: 13px;">AI PERFORMANCE ANALYSIS</span>
+                    <span id="scoreText" style="font-weight: 800; font-size: 20px;">--%</span>
+                </div>
+                <div class="score-bar-bg">
+                    <div id="scoreBar" class="score-bar-fill"></div>
+                </div>
+
+                <div class="freq-badge">
+                    <span style="font-size: 20px;">📅</span>
+                    <div>
+                        <div style="font-size: 10px; font-weight: 700; color: #64748B; text-transform: uppercase;">Strategic Frequency</div>
+                        <div id="freqText" style="font-size: 13px; font-weight: 600; color: #1E293B;">Analyzing word weight...</div>
+                    </div>
+                </div>
+                
+                <p id="analysisText" style="font-size: 12px; color: #64748B; margin-top: 12px; font-style: italic;">Predicted reach is based on current trend alignment.</p>
+            </div>
+
+            <div id="aiResult" class="ai-result">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h4 style="margin: 0;">Optimized Draft</h4>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn-small" style="background: #64748B;" onclick="copyText()">📋 Copy</button>
+                        <button class="btn-small" style="background: #10B981;" onclick="sendToCalendar()">📅 Schedule</button>
+                    </div>
+                </div>
+                <div id="outputText" style="white-space: pre-line; line-height: 1.6; color: #1E293B;"></div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    async function transformContent() {
+        // Now this ID exists!
+        const btn = document.getElementById('transformBtn');
+        const input = document.getElementById('longInput').value;
+        const type = document.getElementById('conversionType').value;
+        
+        if(!input) return alert("Please paste content!");
+
+        btn.innerText = "⏳ AI is Engineering...";
+        btn.disabled = true;
+
+        document.getElementById('analysisBox').style.display = 'block';
+        document.getElementById('aiResult').style.display = 'block';
+        document.getElementById('outputText').innerHTML = "<i>SocialAI Pro is analyzing and drafting...</i>";
+
+        try {
+            const res = await fetch('http://127.0.0.1:5000/transform', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ content: input, type: type })
+            });
+            
+            const data = await res.json();
+            
+            if(data.status === "success") {
+                document.getElementById('outputText').innerText = data.transformed_text;
+                document.getElementById('scoreText').innerText = data.viral_score + "%";
+                document.getElementById('scoreBar').style.width = data.viral_score + "%";
+                document.getElementById('freqText').innerText = data.suggested_frequency;
+                document.getElementById('analysisText').innerText = data.analysis;
+            } else {
+                alert("AI Error: " + data.message);
+            }
+        } catch (e) { 
+            alert("Backend Connection Failed!"); 
+        } finally {
+            btn.innerText = "🪄 Transform with AI";
+            btn.disabled = false;
+        }
+    }
+
+    function copyText() {
+        const text = document.getElementById('outputText').innerText;
+        navigator.clipboard.writeText(text);
+        alert("Copied!");
+    }
+
+    async function sendToCalendar() {
+        const content = document.getElementById('outputText').innerText;
+        const platform = document.getElementById('conversionType').value;
+        const today = new Date().toISOString().split('T')[0];
+        try {
+            const res = await fetch('http://127.0.0.1:5000/schedule', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    date: today, 
+                    platform: platform.toUpperCase(), 
+                    content: content.substring(0, 100) + "..." 
+                })
+            });
+            if(res.ok) alert("Sent to Calendar!");
+        } catch(e) { alert("Sync failed."); }
+    }
+</script>
+</body>
+</html>

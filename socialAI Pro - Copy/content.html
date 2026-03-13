@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>SocialAI Pro | Calendar</title>
+
+<link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+
+<div class="logo">SocialAI Pro</div>
+
+<div class="nav-links-wrapper">
+<a href="dashboard.html" class="nav-item">🏠 Dashboard</a>
+<a href="content.html" class="nav-item active">📅 Content Calendar</a>
+<a href="insights.html" class="nav-item">📊 Strategy Insights</a>
+<a href="ai.html" class="nav-item">🤖 AI Writer</a>
+</div>
+
+<a href="index.html" class="nav-item logout-item">🚪 Log Out</a>
+
+</div>
+
+
+<!-- MAIN CONTENT -->
+<div class="main-content">
+
+<div class="calendar-container">
+
+<div class="calendar-header">
+
+<div>
+<h2 id="monthDisplay">Month Year</h2>
+<p class="calendar-subtitle">Manage your scheduled social content</p>
+</div>
+
+<button class="btn-main" onclick="openModal()">+ Schedule Post</button>
+
+</div>
+
+<div class="calendar-grid" id="calendarGrid"></div>
+
+</div>
+
+</div>
+
+
+<!-- MODAL -->
+<div class="modal" id="scheduleModal">
+
+<div class="modal-content">
+
+<h3>New Schedule</h3>
+
+<label class="schedule-label">SELECT DATE</label>
+<input type="date" id="postDate">
+
+<label class="schedule-label">PLATFORM</label>
+<select id="postPlatform">
+<option>Instagram</option>
+<option>LinkedIn</option>
+<option>Twitter</option>
+</select>
+
+<label class="schedule-label">CONTENT PREVIEW</label>
+<textarea id="postContent" rows="4" placeholder="Draft your content..."></textarea>
+
+<button class="btn-main btn-confirm" onclick="savePost()">Confirm Schedule</button>
+
+<button class="btn-cancel" onclick="closeModal()">Back to Calendar</button>
+
+</div>
+
+</div>
+
+
+<script>
+
+const API_BASE = "http://127.0.0.1:5000";
+let currentDate = new Date();
+
+
+function openModal(){
+
+const today = new Date().toISOString().split('T')[0];
+
+const postDateInput = document.getElementById('postDate');
+
+postDateInput.value = today;
+postDateInput.min = today;
+
+document.getElementById('scheduleModal').style.display = 'flex';
+
+}
+
+
+function closeModal(){
+document.getElementById('scheduleModal').style.display = 'none';
+}
+
+
+async function initCalendar(){
+
+const grid = document.getElementById('calendarGrid');
+const monthDisplay = document.getElementById('monthDisplay');
+
+grid.innerHTML = `
+<div class="day-label">Sun</div>
+<div class="day-label">Mon</div>
+<div class="day-label">Tue</div>
+<div class="day-label">Wed</div>
+<div class="day-label">Thu</div>
+<div class="day-label">Fri</div>
+<div class="day-label">Sat</div>
+`;
+
+const year = currentDate.getFullYear();
+const month = currentDate.getMonth();
+
+monthDisplay.innerText =
+new Intl.DateTimeFormat('en-US',
+{ month:'long', year:'numeric'}).format(currentDate);
+
+const firstDay = new Date(year, month, 1).getDay();
+const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+let savedPosts = [];
+
+try{
+
+const res = await fetch(`${API_BASE}/get_posts`);
+const data = await res.json();
+savedPosts = data.posts || [];
+
+}
+catch(e){
+
+console.error("Database connection error");
+
+}
+
+for(let i=0;i<firstDay;i++){
+
+const empty = document.createElement('div');
+empty.className = 'calendar-day empty';
+grid.appendChild(empty);
+
+}
+
+for(let day=1;day<=daysInMonth;day++){
+
+const dayDiv = document.createElement('div');
+dayDiv.className = 'calendar-day';
+
+const dateStr =
+`${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+
+if(dateStr === new Date().toISOString().split('T')[0]){
+dayDiv.classList.add('today');
+}
+
+dayDiv.innerHTML = `<span class="day-number">${day}</span>`;
+
+savedPosts.forEach(post=>{
+
+if(post.date === dateStr){
+
+const pill = document.createElement('div');
+pill.className = 'post-pill';
+
+pill.innerHTML = `
+<span><strong>${post.platform[0]}</strong>:
+${post.content.substring(0,10)}..</span>
+
+<span onclick="event.stopPropagation(); deletePost(${post.id})"
+style="color:#EF4444; cursor:pointer; font-weight:bold;">×</span>
+`;
+
+dayDiv.appendChild(pill);
+
+}
+
+});
+
+grid.appendChild(dayDiv);
+
+}
+
+}
+
+
+async function savePost(){
+
+const date = document.getElementById('postDate').value;
+const platform = document.getElementById('postPlatform').value;
+const content = document.getElementById('postContent').value;
+
+if(!date || !content){
+alert("Please fill all fields");
+return;
+}
+
+try{
+
+const res = await fetch(`${API_BASE}/schedule`,{
+
+method:'POST',
+headers:{'Content-Type':'application/json'},
+
+body:JSON.stringify({date,platform,content})
+
+});
+
+if(res.ok){
+closeModal();
+initCalendar();
+document.getElementById('postContent').value = '';
+}
+}
+catch(e){
+alert("Server error");
+}
+}
+async function deletePost(postId){
+if(!confirm("Delete this scheduled post?")) return;
+try{
+const res = await fetch(`${API_BASE}/delete_post`,{
+method:'POST',
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify({id:postId})
+});
+if(res.ok){
+initCalendar();
+}
+}
+catch(e){
+alert("Delete failed");
+}
+}
+window.onload = initCalendar;
+
+</script>
+
+</body>
+</html>
