@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SocialAI Pro | AI Social Media Co-Pilot</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        /* Landing page specific styles that aren't in the global style.css */
+        body {
+            line-height: 1.6;
+            display: block; /* Overrides the flex used for sidebar pages */
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 10%;
+            background: white;
+            border-bottom: 1px solid #E5E7EB;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 100px 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            letter-spacing: -1px;
+            font-weight: 800;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: #64748B;
+            margin-bottom: 40px;
+        }
+
+        .solutions-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+            padding: 0 10%;
+            margin-bottom: 100px;
+        }
+
+        /* Responsive Fix for Mobile */
+        @media (max-width: 768px) {
+            .solutions-grid { grid-template-columns: 1fr; }
+            .hero h1 { font-size: 2.5rem; }
+            nav { padding: 20px 5%; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="logo">SocialAI Pro</div>
+        <div class="nav-links">
+            <a href="signup.html" style="text-decoration: none; color: #1F2937; margin-left: 20px;">Dashboard</a>
+            <a href="signup.html" class="btn" style="padding: 10px 20px; margin-left: 20px;">Sign Up</a>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <h1>Stop Guessing. <br> <span style="color: var(--primary);">Start Growing.</span></h1>
+        <p>The AI co-pilot that writes, optimizes, and schedules your content while you sleep.</p>
+        <a href="signup.html" class="btn" style="padding: 15px 40px; text-decoration: none;">Get Started for Free</a>
+    </header>
+
+    <section class="solutions-grid">
+        <div class="card">
+            <h3>📝 Caption Generation</h3>
+            <p>AI-crafted captions tailored to your brand voice and target platform instantly.</p>
+        </div>
+        <div class="card">
+            <h3>#️⃣ Hashtag Generation</h3>
+            <p>Go viral with data-backed hashtags that boost your discoverability.</p>
+        </div>
+        <div class="card">
+            <h3>⏰ Best Time to Post</h3>
+            <p>We guarantee your content hits the feed when most of the audience is online.</p>
+        </div>
+    </section>
+
+</body>
+</html>
